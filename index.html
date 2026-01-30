@@ -13,7 +13,6 @@
     th { background-color: #cc0000; color: white; font-size: 15px; }
     input.qtd { width: 60px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
     #totalGeral { background-color: #e0e0e0; font-weight: bold; padding: 12px; margin: 20px auto; width: 260px; max-width: 80%; text-align: center; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 16px; }
-    #tabelasContainer { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -21,70 +20,37 @@
 
   <div>
     <label for="unidade">Unidade:</label>
-    <select id="unidade" onchange="atualizarTabela(); atualizarTabelaSalario();">
+    <select id="unidade" onchange="atualizarTabela()">
       <option value="">Carregando...</option>
     </select>
   </div>
 
   <div id="totalGeral">Total Geral: R$ 0,00</div>
 
-  <div id="tabelasContainer">
-    <!-- Tabela Hora Aula -->
-    <table>
-      <thead>
-        <tr>
-          <th>Segmento</th>
-          <th>Valor Hora</th>
-          <th>Quantidade</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="tabela"></tbody>
-    </table>
-
-    <!-- Tabela Salário -->
-    <table>
-      <thead>
-        <tr>
-          <th>Segmento</th>
-          <th>Salário</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaSalario"></tbody>
-    </table>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Segmento</th>
+        <th>Valor Hora</th>
+        <th>Quantidade</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
 
   <script>
-    let dadosHora = [];
-    let dadosSalario = [];
+    let dados = [];
 
+    // Função para carregar os dados da API
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
-        const apiDados = await resposta.json();
+        dados = await resposta.json();
 
-        // Hora Aula → Colunas A, B, C
-        dadosHora = apiDados
-          .filter(d => d.colA && d.colB && d.colC) // só pega linhas válidas
-          .map(d => ({
-            segmento: d.colA.trim(),
-            unidade: d.colB.trim(),
-            valor: parseFloat(d.colC) || 0
-          }));
-
-        // Salário → Colunas E, F, G
-        dadosSalario = apiDados
-          .filter(d => d.colE && d.colF && d.colG)
-          .map(d => ({
-            segmento: d.colE.trim(),
-            unidade: d.colF.trim(),
-            salario: parseFloat(d.colG) || 0
-          }));
-
-        // Select de unidades baseado em Hora Aula (Coluna B)
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
-        const unidades = [...new Set(dadosHora.map(d => d.unidade))];
+        const unidades = [...new Set(dados.map(d => d.unidade))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
           opt.value = u;
@@ -99,17 +65,17 @@
     }
 
     function atualizarTabela() {
-      const unidadeSelecionada = document.getElementById("unidade").value;
+      const select = document.getElementById("unidade");
+      const unidadeSelecionada = select.value;
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
-      if (!unidadeSelecionada) return;
+      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
 
-      const linhas = dadosHora.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td data-valor="${d.valor}">R$ ${d.valor.toFixed(2).replace('.', ',')}</td>
+          <td data-valor="${d.valor}">R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</td>
           <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
           <td id="total_${i}">R$ 0,00</td>
         `;
@@ -140,24 +106,7 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
-    function atualizarTabelaSalario() {
-      const unidadeSelecionada = document.getElementById("unidade").value;
-      const tabelaSalario = document.getElementById("tabelaSalario");
-      tabelaSalario.innerHTML = "";
-      if (!unidadeSelecionada) return;
-
-      // Procura a unidade na Coluna F
-      const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
-      linhas.forEach(d => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.segmento}</td>
-          <td>R$ ${d.salario.toFixed(2).replace('.', ',')}</td>
-        `;
-        tabelaSalario.appendChild(tr);
-      });
-    }
-
+    // Carrega os dados ao iniciar
     carregarDados();
   </script>
 </body>
