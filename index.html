@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <title>Cálculo de Hora Aula</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; background-color: #f9f9f9; }
-    h1 { color: #cc0000; margin-bottom: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    h1 { color: #cc0000; margin-bottom: 20px; text-align: center; }
     label { font-weight: bold; margin-right: 10px; font-size: 16px; }
-    select { width: 220px; padding: 8px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc; text-align: center; font-size: 15px; }
-    table { width: 90%; max-width: 900px; margin: 0 auto 20px auto; border-collapse: collapse; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    select { width: 220px; padding: 8px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc; text-align: center; font-size: 15px; display: block; margin-left: auto; margin-right: auto; }
+
+    #tabelasContainer { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+
+    table { width: 400px; border-collapse: collapse; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 14px; }
     th { background-color: #cc0000; color: white; font-size: 15px; }
     input.qtd { width: 60px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+
     #totalGeral { background-color: #e0e0e0; font-weight: bold; padding: 12px; margin: 20px auto; width: 260px; max-width: 80%; text-align: center; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 16px; }
   </style>
 </head>
@@ -27,22 +31,41 @@
 
   <div id="totalGeral">Total Geral: R$ 0,00</div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Segmento</th>
-        <th>Valor Hora</th>
-        <th>Quantidade</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="tabela"></tbody>
-  </table>
+  <div id="tabelasContainer">
+    <!-- Tabela de Hora Aula -->
+    <div>
+      <h2>Hora Aula</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Segmento</th>
+            <th>Valor Hora</th>
+            <th>Quantidade</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+      </table>
+    </div>
+
+    <!-- Tabela de Mensalista -->
+    <div>
+      <h2>Mensalista e Salário</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Segmento</th>
+            <th>Salário</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaMensalista"></tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     let dados = [];
 
-    // Função para carregar os dados da API
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
@@ -65,13 +88,13 @@
     }
 
     function atualizarTabela() {
-      const select = document.getElementById("unidade");
-      const unidadeSelecionada = select.value;
+      const unidadeSelecionada = document.getElementById("unidade").value;
+
+      // --- Tabela Hora Aula ---
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
-      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
-
-      linhas.forEach((d, i) => {
+      const linhasHora = dados.filter(d => d.unidade === unidadeSelecionada && !(d.segmento || "").startsWith("Mensalista"));
+      linhasHora.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
@@ -81,12 +104,23 @@
         `;
         tabela.appendChild(tr);
       });
-
       document.querySelectorAll(".qtd").forEach((input, i) => {
-        input.addEventListener("input", () => calcular(linhas));
+        input.addEventListener("input", () => calcular(linhasHora));
       });
+      calcular(linhasHora);
 
-      calcular(linhas);
+      // --- Tabela Mensalista ---
+      const tabelaMensalista = document.getElementById("tabelaMensalista");
+      tabelaMensalista.innerHTML = "";
+      const linhasMensalista = dados.filter(d => d.unidade === unidadeSelecionada && (d.segmento || "").startsWith("Mensalista"));
+      linhasMensalista.forEach(d => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.segmento}</td>
+          <td>R$ ${parseFloat(d.valor || 0).toFixed(2).replace('.', ',')}</td>
+        `;
+        tabelaMensalista.appendChild(tr);
+      });
     }
 
     function calcular(linhas) {
@@ -106,7 +140,6 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
-    // Carrega os dados ao iniciar
     carregarDados();
   </script>
 </body>
