@@ -89,8 +89,8 @@
         // Limpeza do JSON retornado pelo Google Visualization API
         const json = JSON.parse(text.substr(47).slice(0, -2));
         dadosSalario = json.table.rows.map(r => ({
-          unidade: r.c[3]?.v,   // Coluna D → índice 3
-          segmento: r.c[4]?.v,  // Coluna E → índice 4
+          unidade: r.c[4]?.v,   // Coluna D → índice 3
+          segmento: r.c[5]?.v,  // Coluna E → índice 4
           salario: r.c[6]?.v    // Coluna G → índice 6
         }));
       } catch (erro) {
@@ -164,3 +164,4 @@
   </script>
 </body>
 </html>
+
