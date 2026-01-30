@@ -55,32 +55,32 @@
   </div>
 
   <script>
-    let dados = [];
+    let dadosHora = [];
     let dadosSalario = [];
 
-    // Função para carregar todos os dados da API
+    // Carregar dados da API (Página109)
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
         const apiDados = await resposta.json();
 
-        // Separar dados de Hora Aula e Salário
-        dados = apiDados.map(d => ({
-          segmento: d.segmento,
-          unidade: d.unidade,
-          valor: d.valorHora  // valor da hora aula
+        // Prepara os dados para cada tabela
+        dadosHora = apiDados.map(d => ({
+          segmento: d.segmentoHora || d.colA,   // Coluna A
+          unidade: d.unidadeHora || d.colB,     // Coluna B
+          valor: parseFloat(d.valorHora || d.colC) || 0  // Coluna C
         }));
 
         dadosSalario = apiDados.map(d => ({
-          segmento: d.segmento,
-          unidade: d.unidade,
-          salario: d.salario  // valor do salário
+          segmento: d.segmentoSalario || d.colE, // Coluna E
+          unidade: d.unidadeSalario || d.colF,   // Coluna F
+          salario: parseFloat(d.salario || d.colG) || 0 // Coluna G
         }));
 
-        // Preenche select de unidades
+        // Preenche select de unidades (todas do Hora Aula + Salário)
+        const unidades = [...new Set([...dadosHora, ...dadosSalario].map(d => d.unidade).filter(u => u))];
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
-        const unidades = [...new Set(apiDados.map(d => d.unidade))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
           opt.value = u;
@@ -94,7 +94,7 @@
       }
     }
 
-    // Atualiza tabela de Hora Aula
+    // Atualiza tabela Hora Aula
     function atualizarTabela() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabela = document.getElementById("tabela");
@@ -102,12 +102,12 @@
 
       if (!unidadeSelecionada) return;
 
-      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
+      const linhas = dadosHora.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td data-valor="${d.valor}">R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</td>
+          <td data-valor="${d.valor}">R$ ${d.valor.toFixed(2).replace('.', ',')}</td>
           <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
           <td id="total_${i}">R$ 0,00</td>
         `;
@@ -139,7 +139,7 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
-    // Atualiza tabela de Salário
+    // Atualiza tabela Salário
     function atualizarTabelaSalario() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabelaSalario = document.getElementById("tabelaSalario");
@@ -147,12 +147,12 @@
 
       if (!unidadeSelecionada) return;
 
-      const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada && d.salario != null);
+      const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach(d => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td>R$ ${parseFloat(d.salario).toFixed(2).replace('.', ',')}</td>
+          <td>R$ ${d.salario.toFixed(2).replace('.', ',')}</td>
         `;
         tabelaSalario.appendChild(tr);
       });
