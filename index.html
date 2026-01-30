@@ -63,24 +63,24 @@
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
         const apiDados = await resposta.json();
 
-        // Tabela Hora Aula → Página109 colunas A, B, C
+        // Hora Aula → Colunas A, B, C
         dadosHora = apiDados.map(d => ({
           segmento: d.colA,
           unidade: d.colB,
           valor: parseFloat(d.colC) || 0
-        })).filter(d => d.unidade);
+        }));
 
-        // Tabela Salário → Página109 colunas E, F, G
+        // Salário → Colunas E, F, G
         dadosSalario = apiDados.map(d => ({
           segmento: d.colE,
           unidade: d.colF,
           salario: parseFloat(d.colG) || 0
-        })).filter(d => d.unidade);
+        }));
 
-        // Preenche select com unidades de colB (Valor Hora)
-        const unidades = [...new Set(dadosHora.map(d => d.unidade))];
+        // Select de unidades baseado em Hora Aula (Coluna B)
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
+        const unidades = [...new Set(dadosHora.map(d => d.unidade).filter(u => u))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
           opt.value = u;
@@ -136,14 +136,13 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
-    // Atualiza tabela Salário (PROCV na Coluna F)
     function atualizarTabelaSalario() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabelaSalario = document.getElementById("tabelaSalario");
       tabelaSalario.innerHTML = "";
       if (!unidadeSelecionada) return;
 
-      // Filtra dadosSalario pela unidade selecionada (colF)
+      // Procura a unidade na Coluna F e mostra segmento (E) + salário (G)
       const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach(d => {
         const tr = document.createElement("tr");
