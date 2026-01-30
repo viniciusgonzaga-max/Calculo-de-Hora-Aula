@@ -64,23 +64,27 @@
         const apiDados = await resposta.json();
 
         // Hora Aula → Colunas A, B, C
-        dadosHora = apiDados.map(d => ({
-          segmento: d.colA,
-          unidade: d.colB,
-          valor: parseFloat(d.colC) || 0
-        }));
+        dadosHora = apiDados
+          .filter(d => d.colA && d.colB && d.colC) // só pega linhas válidas
+          .map(d => ({
+            segmento: d.colA.trim(),
+            unidade: d.colB.trim(),
+            valor: parseFloat(d.colC) || 0
+          }));
 
         // Salário → Colunas E, F, G
-        dadosSalario = apiDados.map(d => ({
-          segmento: d.colE,
-          unidade: d.colF,
-          salario: parseFloat(d.colG) || 0
-        }));
+        dadosSalario = apiDados
+          .filter(d => d.colE && d.colF && d.colG)
+          .map(d => ({
+            segmento: d.colE.trim(),
+            unidade: d.colF.trim(),
+            salario: parseFloat(d.colG) || 0
+          }));
 
         // Select de unidades baseado em Hora Aula (Coluna B)
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
-        const unidades = [...new Set(dadosHora.map(d => d.unidade).filter(u => u))];
+        const unidades = [...new Set(dadosHora.map(d => d.unidade))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
           opt.value = u;
@@ -142,7 +146,7 @@
       tabelaSalario.innerHTML = "";
       if (!unidadeSelecionada) return;
 
-      // Procura a unidade na Coluna F e mostra segmento (E) + salário (G)
+      // Procura a unidade na Coluna F
       const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach(d => {
         const tr = document.createElement("tr");
