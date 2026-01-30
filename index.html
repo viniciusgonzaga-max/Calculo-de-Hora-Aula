@@ -58,15 +58,29 @@
     let dados = [];
     let dadosSalario = [];
 
-    // Carregar dados de hora aula
+    // Função para carregar todos os dados da API
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
-        dados = await resposta.json();
+        const apiDados = await resposta.json();
 
+        // Separar dados de Hora Aula e Salário
+        dados = apiDados.map(d => ({
+          segmento: d.segmento,
+          unidade: d.unidade,
+          valor: d.valorHora  // valor da hora aula
+        }));
+
+        dadosSalario = apiDados.map(d => ({
+          segmento: d.segmento,
+          unidade: d.unidade,
+          salario: d.salario  // valor do salário
+        }));
+
+        // Preenche select de unidades
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
-        const unidades = [...new Set(dados.map(d => d.unidade))];
+        const unidades = [...new Set(apiDados.map(d => d.unidade))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
           opt.value = u;
@@ -80,30 +94,15 @@
       }
     }
 
-    // Carregar dados de salário da aba Página109
-    async function carregarDadosSalario() {
-      try {
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/SEU_ID_DE_PLANILHA/gviz/tq?tqx=out:json&sheet=Página109";
-        const resposta = await fetch(sheetUrl);
-        let text = await resposta.text();
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        dadosSalario = json.table.rows.map(r => ({
-          segmento: r.c[4]?.v,  // Coluna E → índice 4
-          unidade: r.c[5]?.v,   // Coluna F → índice 5
-          salario: r.c[6]?.v    // Coluna G → índice 6
-        }));
-      } catch (erro) {
-        console.error("Erro ao carregar dados de salário:", erro);
-      }
-    }
-
-    // Atualiza tabela hora aula
+    // Atualiza tabela de Hora Aula
     function atualizarTabela() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
-      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
 
+      if (!unidadeSelecionada) return;
+
+      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
       linhas.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -122,7 +121,7 @@
       calcular(linhas);
     }
 
-    // Calcula totais
+    // Calcula totais da Hora Aula
     function calcular(linhas) {
       let soma = 0;
       linhas.forEach((d, i) => {
@@ -140,7 +139,7 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
-    // Atualiza tabela salário
+    // Atualiza tabela de Salário
     function atualizarTabelaSalario() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabelaSalario = document.getElementById("tabelaSalario");
@@ -148,7 +147,7 @@
 
       if (!unidadeSelecionada) return;
 
-      const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
+      const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada && d.salario != null);
       linhas.forEach(d => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -159,9 +158,8 @@
       });
     }
 
-    // Carrega dados ao iniciar
+    // Carrega os dados ao iniciar
     carregarDados();
-    carregarDadosSalario();
   </script>
 </body>
 </html>
