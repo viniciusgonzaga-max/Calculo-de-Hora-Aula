@@ -58,7 +58,7 @@
     let dados = [];
     let dadosSalario = [];
 
-    // Função para carregar os dados de hora aula
+    // Carregar dados de hora aula
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
@@ -80,17 +80,16 @@
       }
     }
 
-    // Função para carregar dados de salário da aba Página109
+    // Carregar dados de salário da aba Página109
     async function carregarDadosSalario() {
       try {
         const sheetUrl = "https://docs.google.com/spreadsheets/d/SEU_ID_DE_PLANILHA/gviz/tq?tqx=out:json&sheet=Página109";
         const resposta = await fetch(sheetUrl);
         let text = await resposta.text();
-        // Limpeza do JSON retornado pelo Google Visualization API
         const json = JSON.parse(text.substr(47).slice(0, -2));
         dadosSalario = json.table.rows.map(r => ({
-          unidade: r.c[5]?.v,   // Coluna D → índice 3
           segmento: r.c[4]?.v,  // Coluna E → índice 4
+          unidade: r.c[5]?.v,   // Coluna F → índice 5
           salario: r.c[6]?.v    // Coluna G → índice 6
         }));
       } catch (erro) {
@@ -98,9 +97,9 @@
       }
     }
 
+    // Atualiza tabela hora aula
     function atualizarTabela() {
-      const select = document.getElementById("unidade");
-      const unidadeSelecionada = select.value;
+      const unidadeSelecionada = document.getElementById("unidade").value;
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
       const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
@@ -123,6 +122,7 @@
       calcular(linhas);
     }
 
+    // Calcula totais
     function calcular(linhas) {
       let soma = 0;
       linhas.forEach((d, i) => {
@@ -140,6 +140,7 @@
       document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
+    // Atualiza tabela salário
     function atualizarTabelaSalario() {
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabelaSalario = document.getElementById("tabelaSalario");
@@ -158,11 +159,9 @@
       });
     }
 
-    // Carrega os dados ao iniciar
+    // Carrega dados ao iniciar
     carregarDados();
     carregarDadosSalario();
   </script>
 </body>
 </html>
-
-
