@@ -6,10 +6,13 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
     h1 { color: #cc0000; margin-bottom: 20px; text-align: center; }
-    label { font-weight: bold; margin-right: 10px; font-size: 16px; }
-    select { width: 220px; padding: 8px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc; text-align: center; font-size: 15px; display: block; margin-left: auto; margin-right: auto; }
+    .unidadeContainer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+    label { font-weight: bold; font-size: 16px; }
+    select { width: 220px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; text-align: center; font-size: 15px; }
 
     #tabelasContainer { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+
+    .tabelaWrapper { text-align: center; }
 
     table { width: 400px; border-collapse: collapse; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 14px; }
@@ -22,7 +25,7 @@
 <body>
   <h1>Cálculo de Hora Aula</h1>
 
-  <div>
+  <div class="unidadeContainer">
     <label for="unidade">Unidade:</label>
     <select id="unidade" onchange="atualizarTabela()">
       <option value="">Carregando...</option>
@@ -33,7 +36,7 @@
 
   <div id="tabelasContainer">
     <!-- Tabela de Hora Aula -->
-    <div>
+    <div class="tabelaWrapper">
       <h2>Hora Aula</h2>
       <table>
         <thead>
@@ -49,7 +52,7 @@
     </div>
 
     <!-- Tabela de Mensalista -->
-    <div>
+    <div class="tabelaWrapper">
       <h2>Mensalista e Salário</h2>
       <table>
         <thead>
