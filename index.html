@@ -13,8 +13,6 @@
     th { background-color: #cc0000; color: white; font-size: 15px; }
     input.qtd { width: 60px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
     #totalGeral { background-color: #e0e0e0; font-weight: bold; padding: 12px; margin: 20px auto; width: 260px; max-width: 80%; text-align: center; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 16px; }
-
-    /* Flexbox para colocar as tabelas lado a lado */
     #tabelasContainer { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
   </style>
 </head>
@@ -30,7 +28,6 @@
 
   <div id="totalGeral">Total Geral: R$ 0,00</div>
 
-  <!-- Container para as duas tabelas -->
   <div id="tabelasContainer">
     <!-- Tabela Hora Aula -->
     <table>
@@ -83,11 +80,19 @@
       }
     }
 
-    // Função para carregar os dados de salário
+    // Função para carregar dados de salário da aba Página109
     async function carregarDadosSalario() {
       try {
-        const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec?tipo=salario');
-        dadosSalario = await resposta.json();
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/SEU_ID_DE_PLANILHA/gviz/tq?tqx=out:json&sheet=Página109";
+        const resposta = await fetch(sheetUrl);
+        let text = await resposta.text();
+        // Limpeza do JSON retornado pelo Google Visualization API
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        dadosSalario = json.table.rows.map(r => ({
+          unidade: r.c[3]?.v,   // Coluna D → índice 3
+          segmento: r.c[4]?.v,  // Coluna E → índice 4
+          salario: r.c[6]?.v    // Coluna G → índice 6
+        }));
       } catch (erro) {
         console.error("Erro ao carregar dados de salário:", erro);
       }
