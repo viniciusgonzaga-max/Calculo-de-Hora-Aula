@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cálculo de Hora Aula</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      color: #cc0000;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    select {
+      width: 220px;
+      padding: 8px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    table {
+      width: 90%;
+      max-width: 900px;
+      margin: 0 auto 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #cc0000;
+      color: white;
+      font-size: 15px;
+    }
+
+    input.qtd {
+      width: 60px;
+      padding: 5px;
+      text-align: center;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    #totalGeral {
+      background-color: #e0e0e0;
+      font-weight: bold;
+      padding: 12px;
+      margin: 20px auto;
+      width: 260px;
+      max-width: 80%;
+      text-align: center;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cálculo de Hora Aula</h1>
+
+  <div>
+    <label for="unidade">Unidade:</label>
+    <select id="unidade" onchange="atualizarTabela()">
+      <option value="">Selecione</option>
+    </select>
+  </div>
+
+  <div id="totalGeral">Total Geral: R$ 0,00</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Segmento</th>
+        <th>Valor Hora</th>
+        <th>Quantidade</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+
+  <script>
+    const dados = [
+      {segmento: "EDI", unidade: "CMV", valor: 24.39},
+{segmento: "EDI", unidade: "DEC", valor: 28.30},
+{segmento: "EDI", unidade: "CTM", valor: 24.91},
+{segmento: "EDI", unidade: "DAF", valor: 28.30},
+{segmento: "EDI", unidade: "CAV", valor: 28.54},
+{segmento: "EDI", unidade: "POP", valor: 25.34},
+{segmento: "EDI", unidade: "FAT", valor: 28.30},
+{segmento: "EDI", unidade: "MAS", valor: 28.30},
+{segmento: "EDI", unidade: "UNI", valor: 19.48},
+{segmento: "EDI", unidade: "CSB", valor: 20.09},
+{segmento: "EDI", unidade: "LOU", valor: 20.09},
+{segmento: "EDI", unidade: "CSP", valor: 28.30},
+{segmento: "EDI", unidade: "GRA", valor: 24.91},
+{segmento: "EDI", unidade: "GRU", valor: 24.49},
+{segmento: "EDI", unidade: "CNE", valor: 24.49},
+{segmento: "EDI", unidade: "CRE", valor: 27.32},
+{segmento: "EDI", unidade: "HOR", valor: 28.54},
+{segmento: "EDI", unidade: "VIN", valor: 28.54},
+{segmento: "EDI", unidade: "OSB", valor: 25.38},
+{segmento: "EDI", unidade: "VIL", valor: 25.34},
+{segmento: "EDI", unidade: "ACN", valor: 28.54},
+{segmento: "EDI", unidade: "RUI", valor: 22.64},
+{segmento: "EDI", unidade: "RVT", valor: 25.96},
+{segmento: "EDI", unidade: "UMC", valor: 23.05},
+
+{segmento: "FUND I", unidade: "CMV", valor: 24.39},
+{segmento: "FUND I", unidade: "DEC", valor: 28.30},
+{segmento: "FUND I", unidade: "CTM", valor: 25.41},
+{segmento: "FUND I", unidade: "DAF", valor: 28.30},
+{segmento: "FUND I", unidade: "CAV", valor: 28.54},
+{segmento: "FUND I", unidade: "POP", valor: 25.41},
+{segmento: "FUND I", unidade: "FAT", valor: 28.30},
+{segmento: "FUND I", unidade: "MAS", valor: 28.30},
+{segmento: "FUND I", unidade: "UNI", valor: 25.41},
+{segmento: "FUND I", unidade: "CSB", valor: 20.09},
+{segmento: "FUND I", unidade: "LOU", valor: 20.09},
+{segmento: "FUND I", unidade: "CSP", valor: 28.30},
+{segmento: "FUND I", unidade: "GRA", valor: 25.41},
+{segmento: "FUND I", unidade: "GRU", valor: 25.41},
+{segmento: "FUND I", unidade: "CNE", valor: 25.41},
+{segmento: "FUND I", unidade: "CRE", valor: 30.11},
+{segmento: "FUND I", unidade: "HOR", valor: 28.54},
+{segmento: "FUND I", unidade: "VIN", valor: 28.54},
+{segmento: "FUND I", unidade: "OSB", valor: 25.41},
+{segmento: "FUND I", unidade: "VIL", valor: 25.41},
+{segmento: "FUND I", unidade: "ACN", valor: 28.54},
+{segmento: "FUND I", unidade: "RUI", valor: 25.69},
+{segmento: "FUND I", unidade: "RVT", valor: 27.84},
+{segmento: "FUND I", unidade: "UMC", valor: 25.69},
+
+{segmento: "FUND II", unidade: "CMV", valor: 31.42},
+{segmento: "FUND II", unidade: "DEC", valor: 31.42},
+{segmento: "FUND II", unidade: "CTM", valor: 25.41},
+{segmento: "FUND II", unidade: "DAF", valor: 31.42},
+{segmento: "FUND II", unidade: "CAV", valor: 28.54},
+{segmento: "FUND II", unidade: "POP", valor: 25.41},
+{segmento: "FUND II", unidade: "FAT", valor: 31.42},
+{segmento: "FUND II", unidade: "MAS", valor: 31.42},
+{segmento: "FUND II", unidade: "UNI", valor: 25.41},
+{segmento: "FUND II", unidade: "CSB", valor: 29.37},
+{segmento: "FUND II", unidade: "LOU", valor: 29.37},
+{segmento: "FUND II", unidade: "CSP", valor: 31.42},
+{segmento: "FUND II", unidade: "GRA", valor: 25.41},
+{segmento: "FUND II", unidade: "GRU", valor: 25.41},
+{segmento: "FUND II", unidade: "CNE", valor: 25.41},
+{segmento: "FUND II", unidade: "CRE", valor: 33.43},
+{segmento: "FUND II", unidade: "HOR", valor: 28.54},
+{segmento: "FUND II", unidade: "VIN", valor: 30.95},
+{segmento: "FUND II", unidade: "OSB", valor: 25.41},
+{segmento: "FUND II", unidade: "VIL", valor: 35.48},
+{segmento: "FUND II", unidade: "ACN", valor: 28.54},
+{segmento: "FUND II", unidade: "RUI", valor: 28.54},
+{segmento: "FUND II", unidade: "RVT", valor: 33.43},
+{segmento: "FUND II", unidade: "UMC", valor: 30.95},
+{segmento: "EM", unidade: "CMV", valor: 35.00},
+{segmento: "EM", unidade: "DEC", valor: 35.00},
+{segmento: "EM", unidade: "CTM", valor: 28.22},
+{segmento: "EM", unidade: "DAF", valor: 35.00},
+{segmento: "EM", unidade: "CAV", valor: 30.44},
+{segmento: "EM", unidade: "POP", valor: 28.22},
+{segmento: "EM", unidade: "FAT", valor: 35.00},
+{segmento: "EM", unidade: "MAS", valor: 35.00},
+{segmento: "EM", unidade: "UNI", valor: 28.22},
+{segmento: "EM", unidade: "CSB", valor: 29.37},
+{segmento: "EM", unidade: "LOU", valor: 29.37},
+{segmento: "EM", unidade: "CSP", valor: 35.00},
+{segmento: "EM", unidade: "GRA", valor: 28.22},
+{segmento: "EM", unidade: "GRU", valor: 28.22},
+{segmento: "EM", unidade: "CNE", valor: 28.22},
+{segmento: "EM", unidade: "CRE", valor: 37.25},
+{segmento: "EM", unidade: "HOR", valor: 33.74},
+{segmento: "EM", unidade: "VIN", valor: 34.48},
+{segmento: "EM", unidade: "OSB", valor: 28.22},
+{segmento: "EM", unidade: "VIL", valor: 38.55},
+{segmento: "EM", unidade: "ACN", valor: 33.74},
+{segmento: "EM", unidade: "RUI", valor: 30.44},
+{segmento: "EM", unidade: "RVT", valor: 38.55},
+{segmento: "EM", unidade: "UMC", valor: 35.00},
+
+{segmento: "BIL", unidade: "CMV", valor: 38.37},
+{segmento: "BIL", unidade: "DEC", valor: 38.37},
+{segmento: "BIL", unidade: "CTM", valor: 28.22},
+{segmento: "BIL", unidade: "DAF", valor: 38.37},
+{segmento: "BIL", unidade: "CAV", valor: 38.37},
+{segmento: "BIL", unidade: "POP", valor: 38.37},
+{segmento: "BIL", unidade: "FAT", valor: 38.37},
+{segmento: "BIL", unidade: "MAS", valor: 38.37},
+{segmento: "BIL", unidade: "UNI", valor: 38.37},
+{segmento: "BIL", unidade: "CSB", valor: 34.76},
+{segmento: "BIL", unidade: "LOU", valor: 34.76},
+{segmento: "BIL", unidade: "CSP", valor: 38.37},
+{segmento: "BIL", unidade: "GRA", valor: 28.22},
+{segmento: "BIL", unidade: "GRU", valor: 38.37},
+{segmento: "BIL", unidade: "CNE", valor: 38.37},
+{segmento: "BIL", unidade: "CRE", valor: 38.37},
+{segmento: "BIL", unidade: "HOR", valor: 33.74},
+{segmento: "BIL", unidade: "VIN", valor: 28.54},
+{segmento: "BIL", unidade: "OSB", valor: 25.41},
+{segmento: "BIL", unidade: "VIL", valor: 25.41},
+{segmento: "BIL", unidade: "ACN", valor: 28.54},
+{segmento: "BIL", unidade: "RUI", valor: 38.37},
+{segmento: "BIL", unidade: "RVT", valor: 38.37},
+{segmento: "BIL", unidade: "UMC", valor: 38.37},
+
+{segmento: "NCE", unidade: "CMV", valor: 30.27},
+{segmento: "NCE", unidade: "DEC", valor: 30.27},
+{segmento: "NCE", unidade: "CTM", valor: 25.41},
+{segmento: "NCE", unidade: "DAF", valor: 30.27},
+{segmento: "NCE", unidade: "CAV", valor: 28.54},
+{segmento: "NCE", unidade: "POP", valor: 30.27},
+{segmento: "NCE", unidade: "FAT", valor: 30.27},
+{segmento: "NCE", unidade: "MAS", valor: 30.27},
+{segmento: "NCE", unidade: "UNI", valor: 25.41},
+{segmento: "NCE", unidade: "CSB", valor: 20.09},
+{segmento: "NCE", unidade: "LOU", valor: 20.09},
+{segmento: "NCE", unidade: "CSP", valor: 30.27},
+{segmento: "NCE", unidade: "GRA", valor: 25.41},
+{segmento: "NCE", unidade: "GRU", valor: 25.41},
+{segmento: "NCE", unidade: "CNE", valor: 25.41},
+{segmento: "NCE", unidade: "CRE", valor: 30.27},
+{segmento: "NCE", unidade: "HOR", valor: 28.54},
+{segmento: "NCE", unidade: "VIN", valor: 28.54},
+{segmento: "NCE", unidade: "OSB", valor: 25.41},
+{segmento: "NCE", unidade: "VIL", valor: 26.02},
+{segmento: "NCE", unidade: "ACN", valor: 28.54},
+{segmento: "NCE", unidade: "RUI", valor: 28.54},
+{segmento: "NCE", unidade: "RVT", valor: 28.54},
+{segmento: "NCE", unidade: "UMC", valor: 28.54},
+// Coordenação de área
+{segmento: "Coordenação de área", unidade: "CMV", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "DEC", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "CTM", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "DAF", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "CAV", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "POP", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "FAT", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "MAS", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "UNI", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "CSB", valor: 40.51},
+{segmento: "Coordenação de área", unidade: "LOU", valor: 40.51},
+{segmento: "Coordenação de área", unidade: "CSP", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "GRA", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "GRU", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "CNE", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "CRE", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "HOR", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "VIN", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "OSB", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "VIL", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "ACN", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "RUI", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "RVT", valor: 42.11},
+{segmento: "Coordenação de área", unidade: "UMC", valor: 42.11},
+
+// P+
+{segmento: "P+", unidade: "CMV", valor: 42.11},
+{segmento: "P+", unidade: "DEC", valor: 42.11},
+{segmento: "P+", unidade: "CTM", valor: 42.11},
+{segmento: "P+", unidade: "DAF", valor: 42.11},
+{segmento: "P+", unidade: "CAV", valor: 42.11},
+{segmento: "P+", unidade: "POP", valor: 42.11},
+{segmento: "P+", unidade: "FAT", valor: 42.11},
+{segmento: "P+", unidade: "MAS", valor: 42.11},
+{segmento: "P+", unidade: "UNI", valor: 42.11},
+{segmento: "P+", unidade: "CSB", valor: 40.51},
+{segmento: "P+", unidade: "LOU", valor: 40.51},
+{segmento: "P+", unidade: "CSP", valor: 42.11},
+{segmento: "P+", unidade: "GRA", valor: 42.11},
+{segmento: "P+", unidade: "GRU", valor: 42.11},
+{segmento: "P+", unidade: "CNE", valor: 42.11},
+{segmento: "P+", unidade: "CRE", valor: 42.11},
+{segmento: "P+", unidade: "HOR", valor: 42.11},
+{segmento: "P+", unidade: "VIN", valor: 42.11},
+{segmento: "P+", unidade: "OSB", valor: 42.11},
+{segmento: "P+", unidade: "VIL", valor: 42.11},
+{segmento: "P+", unidade: "ACN", valor: 42.11},
+{segmento: "P+", unidade: "RUI", valor: 42.11},
+{segmento: "P+", unidade: "RVT", valor: 42.11},
+{segmento: "P+", unidade: "UMC", valor: 42.11},
+
+// C +
+{segmento: "C +", unidade: "CMV", valor: 42.11},
+{segmento: "C +", unidade: "DEC", valor: 42.11},
+{segmento: "C +", unidade: "CTM", valor: 42.11},
+{segmento: "C +", unidade: "DAF", valor: 42.11},
+{segmento: "C +", unidade: "CAV", valor: 42.11},
+{segmento: "C +", unidade: "POP", valor: 42.11},
+{segmento: "C +", unidade: "FAT", valor: 42.11},
+{segmento: "C +", unidade: "MAS", valor: 42.11},
+{segmento: "C +", unidade: "UNI", valor: 42.11},
+{segmento: "C +", unidade: "CSB", valor: 40.51},
+{segmento: "C +", unidade: "LOU", valor: 40.51},
+{segmento: "C +", unidade: "CSP", valor: 42.11},
+{segmento: "C +", unidade: "GRA", valor: 42.11},
+{segmento: "C +", unidade: "GRU", valor: 42.11},
+{segmento: "C +", unidade: "CNE", valor: 42.11},
+{segmento: "C +", unidade: "CRE", valor: 42.11},
+{segmento: "C +", unidade: "HOR", valor: 42.11},
+{segmento: "C +", unidade: "VIN", valor: 42.11},
+{segmento: "C +", unidade: "OSB", valor: 42.11},
+{segmento: "C +", unidade: "VIL", valor: 42.11},
+{segmento: "C +", unidade: "ACN", valor: 42.11},
+{segmento: "C +", unidade: "RUI", valor: 42.11},
+{segmento: "C +", unidade: "RVT", valor: 42.11},
+{segmento: "C +", unidade: "UMC", valor: 42.11},
+// EAD
+{segmento: "EAD", unidade: "CMV", valor: 42.11},
+{segmento: "EAD", unidade: "DEC", valor: 42.11},
+{segmento: "EAD", unidade: "CTM", valor: 42.11},
+{segmento: "EAD", unidade: "DAF", valor: 42.11},
+{segmento: "EAD", unidade: "CAV", valor: 42.11},
+{segmento: "EAD", unidade: "POP", valor: 42.11},
+{segmento: "EAD", unidade: "FAT", valor: 42.11},
+{segmento: "EAD", unidade: "MAS", valor: 42.11},
+{segmento: "EAD", unidade: "UNI", valor: 42.11},
+{segmento: "EAD", unidade: "CSB", valor: 42.58},
+{segmento: "EAD", unidade: "LOU", valor: 42.58},
+{segmento: "EAD", unidade: "CSP", valor: 42.11},
+{segmento: "EAD", unidade: "GRA", valor: 42.11},
+{segmento: "EAD", unidade: "GRU", valor: 42.11},
+{segmento: "EAD", unidade: "CNE", valor: 42.11},
+{segmento: "EAD", unidade: "CRE", valor: 42.11},
+{segmento: "EAD", unidade: "HOR", valor: 42.11},
+{segmento: "EAD", unidade: "VIN", valor: 42.11},
+{segmento: "EAD", unidade: "OSB", valor: 42.11},
+{segmento: "EAD", unidade: "VIL", valor: 42.11},
+{segmento: "EAD", unidade: "ACN", valor: 42.11},
+{segmento: "EAD", unidade: "RUI", valor: 42.11},
+{segmento: "EAD", unidade: "RVT", valor: 42.11},
+{segmento: "EAD", unidade: "UMC", valor: 42.11},
+
+// Elab. Mat.Didatico
+{segmento: "Elab. Mat.Didatico", unidade: "CMV", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "DEC", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "CTM", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "DAF", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "CAV", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "POP", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "FAT", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "MAS", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "UNI", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "CSB", valor: 42.58},
+{segmento: "Elab. Mat.Didatico", unidade: "LOU", valor: 42.58},
+{segmento: "Elab. Mat.Didatico", unidade: "CSP", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "GRA", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "GRU", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "CNE", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "CRE", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "HOR", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "VIN", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "OSB", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "VIL", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "ACN", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "RUI", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "RVT", valor: 42.11},
+{segmento: "Elab. Mat.Didatico", unidade: "UMC", valor: 42.11},
+
+// Ensino Técnico
+{segmento: "Ensino Técnico", unidade: "CMV", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "DEC", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "CTM", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "DAF", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "CAV", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "POP", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "FAT", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "MAS", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "UNI", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "CSB", valor: 26.36},
+{segmento: "Ensino Técnico", unidade: "LOU", valor: 26.36},
+{segmento: "Ensino Técnico", unidade: "CSP", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "GRA", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "GRU", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "CNE", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "CRE", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "HOR", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "VIN", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "OSB", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "VIL", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "ACN", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "RUI", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "RVT", valor: 29.30},
+{segmento: "Ensino Técnico", unidade: "UMC", valor: 29.30},
+    ];
+
+    const unidades = [...new Set(dados.map(d => d.unidade))];
+    const select = document.getElementById("unidade");
+    unidades.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u;
+      opt.textContent = u;
+      select.appendChild(opt);
+    });
+
+    function atualizarTabela() {
+      const unidadeSelecionada = select.value;
+      const tabela = document.getElementById("tabela");
+      tabela.innerHTML = "";
+      const linhas = dados.filter(d => d.unidade === unidadeSelecionada);
+
+      linhas.forEach((d, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.segmento}</td>
+          <td data-valor="${d.valor}">R$ ${d.valor.toFixed(2).replace('.', ',')}</td>
+          <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
+          <td id="total_${i}">R$ 0,00</td>
+        `;
+        tabela.appendChild(tr);
+      });
+
+      document.querySelectorAll(".qtd").forEach((input, i) => {
+        input.addEventListener("input", () => calcular(linhas));
+      });
+
+      calcular(linhas);
+    }
+
+    function calcular(linhas) {
+      let soma = 0;
+      linhas.forEach((d, i) => {
+        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value || 0);
+        const total = d.valor * qtd;
+        document.getElementById(`total_${i}`).innerText = "R$ " + total.toFixed(2).replace('.', ',');
+        soma += total;
+      });
+
+      const unidade = select.value;
+      let fator = 1.05;
+      if (unidade === "CSB" || unidade === "LOU") fator = 1.2;
+
+      const totalGeral = ((soma * 4.5) * fator) + (((soma * 4.5) * fator) / 6);
+      document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
+    }
+  </script>
+</body>
+</html>
