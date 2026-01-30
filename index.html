@@ -58,26 +58,27 @@
     let dadosHora = [];
     let dadosSalario = [];
 
-    // Carregar dados da API (Página109)
+    // Carrega dados da API
     async function carregarDados() {
       try {
         const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
         const apiDados = await resposta.json();
 
-        // Prepara os dados para cada tabela
+        // Prepara dados da Tabela Hora Aula (colunas A, B, C)
         dadosHora = apiDados.map(d => ({
-          segmento: d.segmentoHora || d.colA,   // Coluna A
-          unidade: d.unidadeHora || d.colB,     // Coluna B
-          valor: parseFloat(d.valorHora || d.colC) || 0  // Coluna C
+          segmento: d.colA,
+          unidade: d.colB,
+          valor: parseFloat(d.colC) || 0
         }));
 
+        // Prepara dados da Tabela Salário (colunas E, F, G)
         dadosSalario = apiDados.map(d => ({
-          segmento: d.segmentoSalario || d.colE, // Coluna E
-          unidade: d.unidadeSalario || d.colF,   // Coluna F
-          salario: parseFloat(d.salario || d.colG) || 0 // Coluna G
+          segmento: d.colE,
+          unidade: d.colF,
+          salario: parseFloat(d.colG) || 0
         }));
 
-        // Preenche select de unidades (todas do Hora Aula + Salário)
+        // Preenche select de unidades (hora aula + salário)
         const unidades = [...new Set([...dadosHora, ...dadosSalario].map(d => d.unidade).filter(u => u))];
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
@@ -99,7 +100,6 @@
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
-
       if (!unidadeSelecionada) return;
 
       const linhas = dadosHora.filter(d => d.unidade === unidadeSelecionada);
@@ -144,7 +144,6 @@
       const unidadeSelecionada = document.getElementById("unidade").value;
       const tabelaSalario = document.getElementById("tabelaSalario");
       tabelaSalario.innerHTML = "";
-
       if (!unidadeSelecionada) return;
 
       const linhas = dadosSalario.filter(d => d.unidade === unidadeSelecionada);
@@ -158,7 +157,7 @@
       });
     }
 
-    // Carrega os dados ao iniciar
+    // Carrega dados ao iniciar
     carregarDados();
   </script>
 </body>
