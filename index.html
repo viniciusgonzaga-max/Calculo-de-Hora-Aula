@@ -35,7 +35,6 @@
   <div id="totalGeral">Total Geral: R$ 0,00</div>
 
   <div id="tabelasContainer">
-    <!-- Tabela de Hora Aula -->
     <div class="tabelaWrapper">
       <h2>Hora Aula</h2>
       <table>
@@ -51,7 +50,6 @@
       </table>
     </div>
 
-    <!-- Tabela de Mensalista -->
     <div class="tabelaWrapper">
       <h2>Mensalista e Salário</h2>
       <table>
@@ -93,29 +91,33 @@
     function atualizarTabela() {
       const unidadeSelecionada = document.getElementById("unidade").value;
 
-      // --- Tabela Hora Aula ---
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
       const linhasHora = dados.filter(d => d.unidade === unidadeSelecionada && !(d.segmento || "").startsWith("Mensalista"));
+
       linhasHora.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td data-valor="${d.valor}">R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</td>
+          <td>R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</td>
           <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
           <td id="total_${i}">R$ 0,00</td>
         `;
         tabela.appendChild(tr);
       });
-      document.querySelectorAll(".qtd").forEach((input, i) => {
-        input.addEventListener("input", () => calcular(linhasHora));
+
+      document.querySelectorAll(".qtd").forEach(() => {
+        document.querySelectorAll(".qtd").forEach((input) => {
+          input.addEventListener("input", () => calcular(linhasHora));
+        });
       });
+
       calcular(linhasHora);
 
-      // --- Tabela Mensalista ---
       const tabelaMensalista = document.getElementById("tabelaMensalista");
       tabelaMensalista.innerHTML = "";
       const linhasMensalista = dados.filter(d => d.unidade === unidadeSelecionada && (d.segmento || "").startsWith("Mensalista"));
+
       linhasMensalista.forEach(d => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -126,21 +128,31 @@
       });
     }
 
-    function calcular(linhas) {
-      let soma = 0;
-      linhas.forEach((d, i) => {
-        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value || 0);
-        const total = d.valor * qtd;
-        document.getElementById(`total_${i}`).innerText = "R$ " + total.toFixed(2).replace('.', ',');
-        soma += total;
-      });
-
+    function calcularTotalComRegra(valorBase) {
       const unidade = document.getElementById("unidade").value;
       let fator = 1.05;
       if (unidade === "CSB" || unidade === "LOU") fator = 1.2;
 
-      const totalGeral = ((soma * 4.5) * fator) + (((soma * 4.5) * fator) / 6);
-      document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
+      return ((valorBase * 4.5) * fator) + (((valorBase * 4.5) * fator) / 6);
+    }
+
+    function calcular(linhas) {
+      let somaGeral = 0;
+
+      linhas.forEach((d, i) => {
+        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value || 0);
+        const subtotal = d.valor * qtd;
+        const totalSegmento = calcularTotalComRegra(subtotal);
+
+        document.getElementById(`total_${i}`).innerText =
+          "R$ " + totalSegmento.toFixed(2).replace('.', ',');
+
+        somaGeral += subtotal;
+      });
+
+      const totalGeral = calcularTotalComRegra(somaGeral);
+      document.getElementById("totalGeral").innerText =
+        "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
     }
 
     carregarDados();
