@@ -34,6 +34,22 @@
   <div id="totalGeral">Total Geral: R$ 0,00</div>
 
   <div id="tabelasContainer">
+
+    <!-- Mensalista (ESQUERDA) -->
+    <div class="tabelaWrapper">
+      <h2>Mensalista</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Segmento</th>
+            <th>Salário</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaMensalista"></tbody>
+      </table>
+    </div>
+
+    <!-- Hora Aula (MEIO) -->
     <div class="tabelaWrapper">
       <h2>Hora Aula</h2>
       <table>
@@ -49,19 +65,7 @@
       </table>
     </div>
 
-    <div class="tabelaWrapper">
-      <h2>Mensalista</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Segmento</th>
-            <th>Salário</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaMensalista"></tbody>
-      </table>
-    </div>
-
+    <!-- Estagiários (DIREITA) -->
     <div class="tabelaWrapper">
       <h2>Estagiários</h2>
       <table>
@@ -74,10 +78,18 @@
         <tbody id="tabelaEstagiarios"></tbody>
       </table>
     </div>
+
   </div>
 
   <script>
     let dados = [];
+
+    const formatarBRL = (valor) => {
+      return valor.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    };
 
     async function carregarDados() {
       try {
@@ -86,6 +98,7 @@
 
         const select = document.getElementById("unidade");
         select.innerHTML = '<option value="">Selecione</option>';
+
         const unidades = [...new Set(dados.map(d => d.unidade))];
         unidades.forEach(u => {
           const opt = document.createElement("option");
@@ -103,9 +116,9 @@
     function atualizarTabela() {
       const unidadeSelecionada = document.getElementById("unidade").value;
 
-      // Hora Aula
       const tabela = document.getElementById("tabela");
       tabela.innerHTML = "";
+
       const linhasHora = dados.filter(d => 
         d.unidade === unidadeSelecionada && 
         !(d.segmento || "").startsWith("Mensalista") &&
@@ -113,12 +126,14 @@
       );
 
       linhasHora.forEach((d, i) => {
+        const valorHora = parseFloat(d.valor) || 0;
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td>R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</td>
+          <td>${formatarBRL(valorHora)}</td>
           <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
-          <td id="total_${i}">R$ 0,00</td>
+          <td id="total_${i}">${formatarBRL(0)}</td>
         `;
         tabela.appendChild(tr);
       });
@@ -129,38 +144,39 @@
 
       calcular(linhasHora);
 
-      // Mensalistas
       const tabelaMensalista = document.getElementById("tabelaMensalista");
       tabelaMensalista.innerHTML = "";
+
       const linhasMensalista = dados.filter(d => 
         d.unidade === unidadeSelecionada && 
         (d.segmento || "").startsWith("Mensalista")
       );
 
       linhasMensalista.forEach(d => {
+        const valor = parseFloat(d.valor) || 0;
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td>R$ ${parseFloat(d.valor || 0).toFixed(2).replace('.', ',')}</td>
+          <td>${formatarBRL(valor)}</td>
         `;
         tabelaMensalista.appendChild(tr);
       });
 
-      // Estagiários
       const tabelaEstagiarios = document.getElementById("tabelaEstagiarios");
       tabelaEstagiarios.innerHTML = "";
-      const segmentosEstagiarios = ["Tutor", "Complementar", "Volante"];
 
+      const segmentosEstagiarios = ["Tutor", "Complementar", "Volante"];
       const linhasEstagiarios = dados.filter(d => 
         d.unidade === unidadeSelecionada &&
         segmentosEstagiarios.includes((d.segmento || "").trim())
       );
 
       linhasEstagiarios.forEach(d => {
+        const valor = parseFloat(d.valor) || 0;
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.segmento}</td>
-          <td>R$ ${parseFloat(d.valor || 0).toFixed(2).replace('.', ',')}</td>
+          <td>${formatarBRL(valor)}</td>
         `;
         tabelaEstagiarios.appendChild(tr);
       });
@@ -171,30 +187,30 @@
       let fator = 1.05;
       if (unidade === "CSB" || unidade === "LOU") fator = 1.2;
 
-      return ((valorBase * 4.5) * fator) + (((valorBase * 4.5) * fator) / 6);
+      const baseCalculada = valorBase * 4.5 * fator;
+      return baseCalculada + (baseCalculada / 6);
     }
 
     function calcular(linhas) {
       let somaGeral = 0;
 
       linhas.forEach((d, i) => {
-        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value || 0);
-        const subtotal = d.valor * qtd;
+        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value) || 0;
+        const valorHora = parseFloat(d.valor) || 0;
+
+        const subtotal = valorHora * qtd;
         const totalSegmento = calcularTotalComRegra(subtotal);
 
-        document.getElementById(`total_${i}`).innerText =
-          "R$ " + totalSegmento.toFixed(2).replace('.', ',');
-
+        document.getElementById(`total_${i}`).innerText = formatarBRL(totalSegmento);
         somaGeral += subtotal;
       });
 
       const totalGeral = calcularTotalComRegra(somaGeral);
       document.getElementById("totalGeral").innerText =
-        "Total Geral: R$ " + totalGeral.toFixed(2).replace('.', ',');
+        "Total Geral: " + formatarBRL(totalGeral);
     }
 
     carregarDados();
   </script>
 </body>
 </html>
-
