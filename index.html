@@ -35,7 +35,6 @@
 
   <div id="tabelasContainer">
 
-    <!-- Mensalista (ESQUERDA) -->
     <div class="tabelaWrapper">
       <h2>Mensalista</h2>
       <table>
@@ -49,7 +48,6 @@
       </table>
     </div>
 
-    <!-- Hora Aula (MEIO) -->
     <div class="tabelaWrapper">
       <h2>Hora Aula</h2>
       <table>
@@ -65,7 +63,6 @@
       </table>
     </div>
 
-    <!-- Estagiários (DIREITA) -->
     <div class="tabelaWrapper">
       <h2>Estagiários</h2>
       <table>
@@ -192,20 +189,19 @@
     }
 
     function calcular(linhas) {
-      let somaGeral = 0;
+      let somaBase = 0;
 
       linhas.forEach((d, i) => {
         const qtd = parseFloat(document.getElementById(`qtd_${i}`).value) || 0;
         const valorHora = parseFloat(d.valor) || 0;
 
-        const subtotal = valorHora * qtd;
-        const totalSegmento = calcularTotalComRegra(subtotal);
+        const totalLinha = valorHora * qtd * 4.5;
+        document.getElementById(`total_${i}`).innerText = formatarBRL(totalLinha);
 
-        document.getElementById(`total_${i}`).innerText = formatarBRL(totalSegmento);
-        somaGeral += subtotal;
+        somaBase += valorHora * qtd;
       });
 
-      const totalGeral = calcularTotalComRegra(somaGeral);
+      const totalGeral = calcularTotalComRegra(somaBase);
       document.getElementById("totalGeral").innerText =
         "Total Geral: " + formatarBRL(totalGeral);
     }
