@@ -2,211 +2,532 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cálculo de Hora Aula</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
-    h1 { color: #cc0000; margin-bottom: 20px; text-align: center; }
-    .unidadeContainer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
-    label { font-weight: bold; font-size: 16px; }
-    select { width: 220px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; text-align: center; font-size: 15px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    #tabelasContainer { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-    .tabelaWrapper { text-align: center; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f5f5;
+      padding: 32px;
+      color: #1a1a1a;
+    }
 
-    table { width: 400px; border-collapse: collapse; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 14px; }
-    th { background-color: #cc0000; color: white; font-size: 15px; }
-    input.qtd { width: 60px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-    #totalGeral { background-color: #e0e0e0; font-weight: bold; padding: 12px; margin: 20px auto; width: 260px; max-width: 80%; text-align: center; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 16px; }
-  </style>
-</head>
-<body>
-  <h1>Cálculo de Hora Aula</h1>
+    .header {
+      margin-bottom: 32px;
+    }
 
-  <div class="unidadeContainer">
-    <label for="unidade">Unidade:</label>
-    <select id="unidade" onchange="atualizarTabela()">
-      <option value="">Carregando...</option>
-    </select>
-  </div>
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #cc0000;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+      text-align: center;
+    }
 
-  <div id="totalGeral">Total Geral: R$ 0,00</div>
+    .unidade-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #e5e5e5;
+      max-width: 400px;
+      margin: 0 auto 24px auto;
+    }
 
-  <div id="tabelasContainer">
+    .unidade-container label {
+      font-weight: 500;
+      font-size: 14px;
+      color: #666;
+    }
 
-    <div class="tabelaWrapper">
-      <h2>Mensalista</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Segmento</th>
-            <th>Salário</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaMensalista"></tbody>
-      </table>
-    </div>
+    select {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #1a1a1a;
+    }
 
-    <div class="tabelaWrapper">
-      <h2>Hora Aula</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Segmento</th>
-            <th>Valor Hora</th>
-            <th>Quantidade</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="tabela"></tbody>
-      </table>
-    </div>
+    select:hover {
+      border-color: #cc0000;
+    }
 
-    <div class="tabelaWrapper">
-      <h2>Estagiários</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Segmento</th>
-            <th>Salário</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaEstagiarios"></tbody>
-      </table>
-    </div>
+    select:focus {
+      outline: none;
+      border-color: #cc0000;
+      box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
+    }
 
-  </div>
+    .total-wrapper {
+      max-width: 400px;
+      margin: 0 auto 32px auto;
+    }
 
-  <script>
-    let dados = [];
+    .total-card {
+      background: linear-gradient(135deg, #cc0000 0%, #a00000 100%);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(204, 0, 0, 0.2);
+    }
 
-    const formatarBRL = (valor) => {
-      return valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      });
-    };
+    .total-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
 
-    async function carregarDados() {
-      try {
-        const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
-        dados = await resposta.json();
+    .total-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -1px;
+    }
 
-        const select = document.getElementById("unidade");
-        select.innerHTML = '<option value="">Selecione</option>';
+    /* Layout principal: Hora Aula (esquerda) e coluna direita com 2 cards */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
 
-        const unidades = [...new Set(dados.map(d => d.unidade))];
-        unidades.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u;
-          opt.textContent = u;
-          select.appendChild(opt);
-        });
+    /* Coluna da direita empilha os cards */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-      } catch (erro) {
-        console.error("Erro ao carregar dados da API:", erro);
-        document.getElementById("unidade").innerHTML = '<option value="">Erro ao carregar</option>';
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #e5e5e5;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+
+    .card-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: -0.3px;
+    }
+
+    .card-body {
+      padding: 20px 24px;
+      flex: 1;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 12px;
+      background: #f8f8f8;
+      color: #666;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    td {
+      padding: 12px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #1a1a1a;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td:not(:first-child) {
+      text-align: center;
+    }
+    
+    th:not(:first-child) {
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      max-width: 120px;
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+      background: white;
+      text-align: center;
+    }
+
+    input:hover {
+      border-color: #cc0000;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #cc0000;
+      box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 0.5;
+    }
+
+    .money-value {
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .right-column {
+        gap: 16px;
       }
     }
 
-    function atualizarTabela() {
-      const unidadeSelecionada = document.getElementById("unidade").value;
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
 
-      const tabela = document.getElementById("tabela");
-      tabela.innerHTML = "";
+      h1 {
+        font-size: 24px;
+      }
 
-      const linhasHora = dados.filter(d => 
-        d.unidade === unidadeSelecionada && 
-        !(d.segmento || "").startsWith("Mensalista") &&
-        !["Tutor", "Complementar", "Volante"].includes((d.segmento || "").trim())
-      );
+      .total-value {
+        font-size: 32px;
+      }
 
-      linhasHora.forEach((d, i) => {
-        const valorHora = parseFloat(d.valor) || 0;
+      .card-header,
+      .card-body {
+        padding: 16px;
+      }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.segmento}</td>
-          <td>${formatarBRL(valorHora)}</td>
-          <td><input type="number" class="qtd" id="qtd_${i}" min="0" value="0"></td>
-          <td id="total_${i}">${formatarBRL(0)}</td>
-        `;
-        tabela.appendChild(tr);
-      });
+      th, td {
+        padding: 8px;
+        font-size: 12px;
+      }
 
-      document.querySelectorAll(".qtd").forEach((input) => {
-        input.addEventListener("input", () => calcular(linhasHora));
-      });
+      input {
+        max-width: 80px;
+        padding: 6px 8px;
+        font-size: 12px;
+      }
 
-      calcular(linhasHora);
-
-      const tabelaMensalista = document.getElementById("tabelaMensalista");
-      tabelaMensalista.innerHTML = "";
-
-      const linhasMensalista = dados.filter(d => 
-        d.unidade === unidadeSelecionada && 
-        (d.segmento || "").startsWith("Mensalista")
-      );
-
-      linhasMensalista.forEach(d => {
-        const valor = parseFloat(d.valor) || 0;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.segmento}</td>
-          <td>${formatarBRL(valor)}</td>
-        `;
-        tabelaMensalista.appendChild(tr);
-      });
-
-      const tabelaEstagiarios = document.getElementById("tabelaEstagiarios");
-      tabelaEstagiarios.innerHTML = "";
-
-      const segmentosEstagiarios = ["Tutor", "Complementar", "Volante"];
-      const linhasEstagiarios = dados.filter(d => 
-        d.unidade === unidadeSelecionada &&
-        segmentosEstagiarios.includes((d.segmento || "").trim())
-      );
-
-      linhasEstagiarios.forEach(d => {
-        const valor = parseFloat(d.valor) || 0;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.segmento}</td>
-          <td>${formatarBRL(valor)}</td>
-        `;
-        tabelaEstagiarios.appendChild(tr);
-      });
+      .unidade-container {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+      }
     }
 
-    function calcularTotalComRegra(valorBase) {
-      const unidade = document.getElementById("unidade").value;
-      let fator = 1.05;
-      if (unidade === "CSB" || unidade === "LOU") fator = 1.2;
-
-      const baseCalculada = valorBase * 4.5 * fator;
-      return baseCalculada + (baseCalculada / 6);
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
 
-    function calcular(linhas) {
-      let somaBase = 0;
-
-      linhas.forEach((d, i) => {
-        const qtd = parseFloat(document.getElementById(`qtd_${i}`).value) || 0;
-        const valorHora = parseFloat(d.valor) || 0;
-
-        const totalLinha = valorHora * qtd * 4.5;
-        document.getElementById(`total_${i}`).innerText = formatarBRL(totalLinha);
-
-        somaBase += valorHora * qtd;
-      });
-
-      const totalGeral = calcularTotalComRegra(somaBase);
-      document.getElementById("totalGeral").innerText =
-        "Total Geral: " + formatarBRL(totalGeral);
+    ::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 10px;
     }
 
-    carregarDados();
-  </script>
+    ::-webkit-scrollbar-thumb {
+      background: #cc0000;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a00000;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Cálculo de Hora Aula</h1>
+    
+    <div class="unidade-container">
+      <label>Unidade</label>
+      <select id="unidade" onchange="atualizarTabela()">
+        <option value="">Carregando...</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="total-wrapper">
+    <div class="total-card">
+      <div class="total-label">Total Geral</div>
+      <div class="total-value" id="totalGeral">R$ 0,00</div>
+    </div>
+  </div>
+
+  <!-- Layout: Hora Aula (esquerda) | Mensalista + Estagiários (direita) -->
+  <div class="main-layout" id="mainLayout"></div>
+</div>
+
+<script>
+let dados = [];
+let linhasHoraGlobal = [];
+
+const formatarBRL = (valor) => {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+};
+
+function round2(valor) {
+  return Math.round((valor + Number.EPSILON) * 100) / 100;
+}
+
+async function carregarDados() {
+  try {
+    const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
+    dados = await resposta.json();
+
+    const select = document.getElementById("unidade");
+    const unidades = [...new Set(dados.map(d => d.unidade))];
+
+    select.innerHTML = '<option value="">Selecione uma unidade</option>';
+    unidades.forEach(u => {
+      select.innerHTML += `<option value="${u}">${u}</option>`;
+    });
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+    document.getElementById("unidade").innerHTML = '<option value="">Erro ao carregar</option>';
+  }
+}
+
+function criarCard(titulo, conteudo) {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <h2>${titulo}</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          ${conteudo}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function atualizarTabela() {
+  const unidade = document.getElementById("unidade").value;
+  if (!unidade) return;
+
+  const mainLayout = document.getElementById("mainLayout");
+  mainLayout.innerHTML = '';
+
+  // Hora Aula (lado esquerdo)
+  const linhasHora = dados.filter(d => 
+    d.unidade === unidade && 
+    !(d.segmento || "").startsWith("Mensalista") &&
+    !["Tutor", "Complementar", "Volante"].includes((d.segmento || "").trim())
+  );
+  
+  linhasHoraGlobal = linhasHora;
+  
+  let tabelaHora = `
+    <table>
+      <thead>
+        <tr><th>Segmento</th><th>Valor Hora</th><th>Quantidade</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+  `;
+  
+  if (linhasHora.length === 0) {
+    tabelaHora += `<tr><td colspan="4" style="text-align: center;">Nenhum dado encontrado</td></tr>`;
+  } else {
+    linhasHora.forEach((d, i) => {
+      const valor = parseFloat(d.valor) || 0;
+      tabelaHora += `
+        <tr>
+          <td>${d.segmento}</td>
+          <td class="money-value">${formatarBRL(valor)}</td>
+          <td><input type="number" step="1" min="0" id="qtd_${i}" value="0"></td>
+          <td class="money-value" id="total_${i}">${formatarBRL(0)}</td>
+        </tr>
+      `;
+    });
+  }
+  tabelaHora += `</tbody>
+  </table>`;
+  
+  const horaAulaCard = criarCard('Hora Aula', tabelaHora);
+  
+  // Mensalistas
+  const mensalistas = dados.filter(d => d.unidade === unidade && d.segmento && d.segmento.toLowerCase().startsWith("mensalista"));
+  let tabelaMensalista = `
+    <table>
+      <thead>
+        <tr><th>Segmento</th><th>Salário</th></tr>
+      </thead>
+      <tbody>
+  `;
+  
+  if (mensalistas.length === 0) {
+    tabelaMensalista += `<tr><td colspan="2" style="text-align: center;">Nenhum mensalista encontrado</td></tr>`;
+  } else {
+    mensalistas.forEach(d => {
+      tabelaMensalista += `
+        <tr>
+          <td>${d.segmento}</td>
+          <td class="money-value">${formatarBRL(parseFloat(d.valor) || 0)}</td>
+        </tr>
+      `;
+    });
+  }
+  tabelaMensalista += `</tbody>
+  </table>`;
+  
+  // Estagiários
+  const estagiarios = ["Tutor", "Complementar", "Volante"];
+  let tabelaEstagio = `
+    <table>
+      <thead>
+        <tr><th>Segmento</th><th>Salário</th></tr>
+      </thead>
+      <tbody>
+  `;
+  
+  let encontrouEstagiario = false;
+  estagiarios.forEach(seg => {
+    const estagiarioData = dados.filter(d => d.unidade === unidade && d.segmento === seg);
+    estagiarioData.forEach(d => {
+      encontrouEstagiario = true;
+      tabelaEstagio += `
+        <tr>
+          <td>${d.segmento}</td>
+          <td class="money-value">${formatarBRL(parseFloat(d.valor) || 0)}</td>
+        </tr>
+      `;
+    });
+  });
+  
+  if (!encontrouEstagiario) {
+    tabelaEstagio += `<tr><td colspan="2" style="text-align: center;">Nenhum estagiário encontrado</td></tr>`;
+  }
+  tabelaEstagio += `</tbody>
+  </table>`;
+  
+  const mensalistaCard = criarCard('Mensalista', tabelaMensalista);
+  const estagiarioCard = criarCard('Estagiários', tabelaEstagio);
+  
+  // Montar o layout: esquerda com Hora Aula, direita com Mensalista e Estagiários empilhados
+  mainLayout.innerHTML = `
+    ${horaAulaCard}
+    <div class="right-column">
+      ${mensalistaCard}
+      ${estagiarioCard}
+    </div>
+  `;
+
+  // Adicionar eventos aos inputs
+  setTimeout(() => {
+    document.querySelectorAll("[id^='qtd_']").forEach(input =>
+      input.addEventListener("input", calcularGlobal)
+    );
+  }, 0);
+
+  calcularGlobal();
+}
+
+function calcularTotalComRegra(valorBase) {
+  const unidade = document.getElementById("unidade").value;
+  let fator = 1.05;
+  if (unidade === "CSB" || unidade === "LOU") fator = 1.2;
+
+  const baseCalculada = valorBase * 4.5 * fator;
+  return baseCalculada + (baseCalculada / 6);
+}
+
+function calcularGlobal() {
+  let somaBase = 0;
+
+  linhasHoraGlobal.forEach((d, i) => {
+    const qtd = Math.floor(parseFloat(document.getElementById(`qtd_${i}`)?.value) || 0);
+    const valor = parseFloat(d.valor) || 0;
+
+    const base = round2(valor * qtd);
+    const total = base * 4.5;
+
+    const totalCell = document.getElementById(`total_${i}`);
+    if (totalCell) totalCell.innerText = formatarBRL(total);
+
+    somaBase += base;
+  });
+
+  const totalFinal = calcularTotalComRegra(somaBase);
+  document.getElementById("totalGeral").innerText = formatarBRL(totalFinal);
+}
+
+carregarDados();
+</script>
+
 </body>
 </html>
