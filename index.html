@@ -339,10 +339,6 @@ const formatarBRL = (valor) => {
   });
 };
 
-function round2(valor) {
-  return Math.round((valor + Number.EPSILON) * 100) / 100;
-}
-
 async function carregarDados() {
   try {
     const resposta = await fetch('https://script.google.com/macros/s/AKfycbyKMWfYsfbXfOw0MRS_Wh39jnjmdO7dJuCLPTb7hZT7K_DPoN8oSdDxFEiPGrcBx49yEw/exec');
@@ -513,7 +509,7 @@ function calcularGlobal() {
     const qtd = Math.floor(parseFloat(document.getElementById(`qtd_${i}`)?.value) || 0);
     const valor = parseFloat(d.valor) || 0;
 
-    const base = round2(valor * qtd);
+    const base = valor * qtd;
     const total = base * 4.5;
 
     const totalCell = document.getElementById(`total_${i}`);
